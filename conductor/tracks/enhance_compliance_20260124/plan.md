@@ -1,9 +1,9 @@
 # Implementation Plan - Enhance Compliance Analysis
 
 ## Phase 1: Foundation - Citation Engine
-- [ ] **Task: Define Citation Data Structures**
-    - [ ] Define `Citation` interface in `index.tsx` (docId, page, textSnippet, sectionLabel).
-    - [ ] Update `Message` and `AuditLog` interfaces to include `citations: Citation[]`.
+- [x] **Task: Define Citation Data Structures** 6cc4c79
+    - [x] Define `Citation` interface in `index.tsx` (docId, page, textSnippet, sectionLabel).
+    - [x] Update `Message` and `AuditLog` interfaces to include `citations: Citation[]`.
 - [ ] **Task: Update AI Prompt Engineering for Chat**
     - [ ] Modify `handleSendMessage` system instruction to request specific citation formats (e.g., XML tags or JSON blocks) embedded in the response.
     - [ ] Implement a parser to extract these citations from the raw AI text stream and populate the `citations` array.
