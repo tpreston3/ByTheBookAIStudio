@@ -46,7 +46,7 @@ import {
 
 // --- Types ---
 
-interface UploadedFile {
+export interface UploadedFile {
   name: string;
   type: string;
   content?: string; 
@@ -54,7 +54,7 @@ interface UploadedFile {
   size: number;
 }
 
-interface ProjectContext {
+export interface ProjectContext {
   name: string;
   productionType: string;
   budgetAmount: string;
@@ -69,18 +69,26 @@ interface ProjectContext {
   documents: UploadedFile[];
 }
 
-interface Message {
+export interface Citation {
+  docId: string;
+  page: number;
+  textSnippet: string;
+  sectionLabel: string;
+}
+
+export interface Message {
   role: 'user' | 'assistant';
   content: string;
-  citations?: string[];
+  citations?: Citation[];
   isLoading?: boolean;
 }
 
-interface AuditLog {
+export interface AuditLog {
   id: string;
   timestamp: string;
   query: string;
   status: 'compliant' | 'violation' | 'info';
+  citations?: Citation[];
 }
 
 // --- Constants ---
