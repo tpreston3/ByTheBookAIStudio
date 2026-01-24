@@ -91,6 +91,19 @@ export interface AuditLog {
   citations?: Citation[];
 }
 
+export interface ValidationIssue {
+  rule: string;
+  description: string;
+  severity: 'high' | 'medium' | 'low';
+  source_reference?: Citation;
+}
+
+export interface ValidationResult {
+  status: 'compliant' | 'warning' | 'violation';
+  issues: ValidationIssue[];
+  summary: string;
+}
+
 // --- Constants ---
 
 const PRODUCTION_TYPES = [
@@ -123,6 +136,39 @@ const STORAGE_KEY = 'bythebook_project_setup_v6';
 const MAX_TEXT_TOKENS_CHARS = 150000; 
 
 // --- Utilities ---
+
+export const constructAuditPrompt = (context: any) => {
+  return `
+        PERFORM COMPLIANCE AUDIT ON THE ATTACHED DEAL MEMO.
+        Context: ${context.name} in ${context.location} with a budget of $${context.budgetAmount}.
+        Dates: ${context.startDate} to ${context.endDate}.
+        Check against ${context.unions.join(', ')} master agreements.
+        Identify:
+        1. Meal Penalty violations.
+        2. Rest period insufficiencies.
+        3. Rate discrepancies.
+        4. Health/Pension requirements.
+
+        Return JSON ONLY:
+        {
+          "status": "compliant" | "warning" | "violation",
+          "issues": [
+            {
+              "rule": "string",
+              "description": "string",
+              "severity": "high" | "medium" | "low",
+              "source_reference": {
+                "docId": "string",
+                "page": "number",
+                "textSnippet": "string",
+                "sectionLabel": "string"
+              }
+            }
+          ],
+          "summary": "string"
+        }
+      `;
+};
 
 export const parseCitations = (text: string): { content: string, citations: Citation[] } => {
   const citations: Citation[] = [];
@@ -277,7 +323,7 @@ const App = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [validatorInput, setValidatorInput] = useState('');
   const [selectedValidatorFile, setSelectedValidatorFile] = useState<UploadedFile | null>(null);
-  const [validationResult, setValidationResult] = useState<any>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
 
   const [viewingDoc, setViewingDoc] = useState<UploadedFile | null>(null);
   const [highlightTerm, setHighlightTerm] = useState<string>('');
@@ -457,24 +503,7 @@ const App = () => {
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const prompt = `
-        PERFORM COMPLIANCE AUDIT ON THE ATTACHED DEAL MEMO.
-        Context: ${project.name} in ${project.location} with a budget of $${project.budgetAmount}.
-        Dates: ${project.startDate} to ${project.endDate}.
-        Check against ${project.unions.join(', ')} master agreements.
-        Identify:
-        1. Meal Penalty violations.
-        2. Rest period insufficiencies.
-        3. Rate discrepancies.
-        4. Health/Pension requirements.
-
-        Return JSON ONLY:
-        {
-          "status": "compliant" | "warning" | "violation",
-          "issues": [{"rule": "string", "description": "string", "severity": "high" | "medium" | "low"}],
-          "summary": "string"
-        }
-      `;
+      const prompt = constructAuditPrompt(project);
 
       const parts: any[] = [];
       // Use text only for reference docs
