@@ -7,9 +7,9 @@
 - [x] **Task: Update AI Prompt Engineering for Chat** 4932f4c
     - [x] Modify `handleSendMessage` system instruction to request specific citation formats (e.g., XML tags or JSON blocks) embedded in the response.
     - [x] Implement a parser to extract these citations from the raw AI text stream and populate the `citations` array.
-- [ ] **Task: Update AI Prompt Engineering for Audit**
-    - [ ] Modify `handleValidateDealMemo` prompt to require `source_reference` fields for every identified issue.
-    - [ ] Verify that the returned JSON structure correctly maps to the new interface.
+- [x] **Task: Update AI Prompt Engineering for Audit** 811e846
+    - [x] Modify `handleValidateDealMemo` prompt to require `source_reference` fields for every identified issue.
+    - [x] Verify that the returned JSON structure correctly maps to the new interface.
 - [ ] **Task: Conductor - User Manual Verification 'Foundation - Citation Engine' (Protocol in workflow.md)**
 
 ## Phase 2: UI Integration - Advisor Chat
