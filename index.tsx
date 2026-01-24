@@ -124,6 +124,23 @@ const MAX_TEXT_TOKENS_CHARS = 150000;
 
 // --- Utilities ---
 
+export const parseCitations = (text: string): { content: string, citations: Citation[] } => {
+  const citations: Citation[] = [];
+  const citationRegex = /<CITATION>([\s\S]*?)<\/CITATION>/g;
+  
+  const content = text.replace(citationRegex, (match, json) => {
+    try {
+      const citation = JSON.parse(json);
+      citations.push(citation);
+    } catch (e) {
+      console.error('Failed to parse citation JSON', e);
+    }
+    return ''; // Remove the citation block from the content
+  });
+
+  return { content, citations };
+};
+
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -381,6 +398,17 @@ const App = () => {
         Analyze the query and find specific answers within the provided contracts. 
         Always provide section-level citations and mention document names in brackets like [DocumentName.pdf].
         Use a professional, legal, and compliance-oriented tone.
+
+        CITATION FORMAT:
+        When you find a specific clause or rule, you MUST include a machine-readable citation block at the end of your response (or after the relevant paragraph) in the following format:
+        <CITATION>
+        {
+          "docId": "exact_document_name.pdf",
+          "page": 12,
+          "textSnippet": "exact text from document",
+          "sectionLabel": "Article 12.A"
+        }
+        </CITATION>
       `;
 
       // CRITICAL: We prioritize text content to avoid token overflow. 
@@ -404,8 +432,10 @@ const App = () => {
         config: { systemInstruction, temperature: 0.15 }
       });
 
-      const text = response.text || "I was unable to retrieve a definitive answer from the current documents.";
-      setMessages(prev => [...prev.slice(0, -1), { role: 'assistant', content: text }]);
+      const rawText = response.text || "I was unable to retrieve a definitive answer from the current documents.";
+      const { content, citations } = parseCitations(rawText);
+      
+      setMessages(prev => [...prev.slice(0, -1), { role: 'assistant', content, citations }]);
       setLogs(prev => [{ id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toLocaleTimeString(), query, status: 'info' }, ...prev]);
     } catch (error: any) {
       console.error(error);
