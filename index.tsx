@@ -245,6 +245,17 @@ const extractTextFromFile = async (file: File): Promise<string> => {
 
 // --- Components ---
 
+export const CitationBadge = ({ citation, onClick }: { citation: Citation, onClick: (c: Citation) => void }) => (
+  <button
+    onClick={() => onClick(citation)}
+    title={citation.docId} // Basic tooltip
+    className="inline-flex items-center space-x-1 px-2.5 py-1 mx-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-lg text-[10px] font-black uppercase transition-all shadow-sm cursor-pointer"
+  >
+    <FileText size={10} className="mr-0.5" />
+    <span>{citation.sectionLabel}</span>
+  </button>
+);
+
 const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
   <button
     onClick={onClick}
