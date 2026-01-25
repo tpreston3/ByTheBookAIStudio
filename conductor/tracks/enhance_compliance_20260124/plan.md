@@ -13,9 +13,9 @@
 - [x] **Task: Conductor - User Manual Verification 'Foundation - Citation Engine' (Protocol in workflow.md)**
 
 ## Phase 2: UI Integration - Advisor Chat
-- [ ] **Task: Create Citation Component**
-    - [ ] Build `CitationBadge` component using Tailwind (Amber border/text, small, pill-shaped).
-    - [ ] Implement "Tooltip" behavior on hover to show the specific section/article name.
+- [x] **Task: Create Citation Component** 4b45188
+    - [x] Build `CitationBadge` component using Tailwind (Amber border/text, small, pill-shaped).
+    - [x] Implement "Tooltip" behavior on hover to show the specific section/article name.
 - [ ] **Task: Connect Chat to Document Viewer**
     - [ ] Write logic to handle clicks on `CitationBadge`.
     - [ ] Ensure clicking opens the Document Viewer (`viewingDoc` state) and auto-scrolls/highlights the specific snippet.
