@@ -262,6 +262,24 @@ export const CitationBadge = ({ citation, onClick }: { citation: Citation, onCli
   </button>
 );
 
+export const ChatBubble = ({ message, onCitationClick }: { message: Message, onCitationClick: (c: Citation) => void }) => {
+  return (
+    <div className="space-y-4">
+      <div className="whitespace-pre-wrap">{message.content}</div>
+      {message.citations && message.citations.length > 0 && (
+        <div className="pt-4 border-t border-gray-800/50">
+          <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-3">Verified Sources</p>
+          <div className="flex flex-wrap gap-2">
+            {message.citations.map((citation, i) => (
+              <CitationBadge key={i} citation={citation} onClick={onCitationClick} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
   <button
     onClick={onClick}
@@ -578,24 +596,6 @@ const App = () => {
       setViewingDoc(resolution.doc);
       setHighlightTerm(resolution.term);
     }
-  };
-
-  const renderMessageContent = (msg: Message) => {
-    return (
-      <div className="space-y-4">
-        <div className="whitespace-pre-wrap">{msg.content}</div>
-        {msg.citations && msg.citations.length > 0 && (
-          <div className="pt-4 border-t border-gray-800/50">
-            <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-3">Verified Sources</p>
-            <div className="flex flex-wrap gap-2">
-              {msg.citations.map((citation, i) => (
-                <CitationBadge key={i} citation={citation} onClick={handleCitationClick} />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
   };
 
   const HighlightedDocument = ({ doc, term }: { doc: UploadedFile, term: string }) => {
@@ -919,7 +919,7 @@ const App = () => {
               <div className={`max-w-[85%] rounded-[2.5rem] p-8 shadow-2xl ${
                 msg.role === 'user' ? 'bg-amber-600 text-white font-black text-sm' : 'bg-gray-900/80 border border-gray-800 text-gray-200'
               }`}>
-                {msg.isLoading ? <Loader2 className="animate-spin text-amber-500" size={24} /> : renderMessageContent(msg)}
+                {msg.isLoading ? <Loader2 className="animate-spin text-amber-500" size={24} /> : <ChatBubble message={msg} onCitationClick={handleCitationClick} />}
               </div>
             </div>
           ))}
