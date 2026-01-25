@@ -280,6 +280,35 @@ export const ChatBubble = ({ message, onCitationClick }: { message: Message, onC
   );
 };
 
+export const ValidatorResults = ({ result, onVerify }: { result: ValidationResult | null, onVerify: (c: Citation) => void }) => {
+  if (!result) return <p className="text-gray-600 text-center py-20 uppercase font-black tracking-widest">Awaiting Analysis</p>;
+
+  return (
+    <div className="space-y-8">
+      <div className={`p-10 rounded-[2rem] border-2 font-black italic text-4xl ${
+        result.status === 'compliant' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 'border-red-500/20 text-red-500 bg-red-500/5'
+      }`}>
+        {result.status.toUpperCase()}
+      </div>
+      <div className="space-y-4">
+        {result.issues.map((issue, i) => (
+          <div key={i} className="bg-gray-950 p-6 rounded-2xl border border-gray-800 flex justify-between items-start">
+            <div>
+                <p className="text-blue-400 text-xs font-black uppercase mb-2">{issue.rule}</p>
+                <p className="text-gray-400 text-sm">{issue.description}</p>
+            </div>
+            {issue.source_reference && (
+                <div className="ml-4 shrink-0">
+                    <CitationBadge citation={issue.source_reference} onClick={onVerify} />
+                </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
   <button
     onClick={onClick}
@@ -999,23 +1028,7 @@ const App = () => {
           </button>
         </div>
         <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] p-12 overflow-y-auto custom-scrollbar">
-          {validationResult ? (
-            <div className="space-y-8">
-              <div className={`p-10 rounded-[2rem] border-2 font-black italic text-4xl ${
-                validationResult.status === 'compliant' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 'border-red-500/20 text-red-500 bg-red-500/5'
-              }`}>
-                {validationResult.status.toUpperCase()}
-              </div>
-              <div className="space-y-4">
-                {validationResult.issues.map((issue: any, i: number) => (
-                  <div key={i} className="bg-gray-950 p-6 rounded-2xl border border-gray-800">
-                    <p className="text-blue-400 text-xs font-black uppercase mb-2">{issue.rule}</p>
-                    <p className="text-gray-400 text-sm">{issue.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : <p className="text-gray-600 text-center py-20 uppercase font-black tracking-widest">Awaiting Analysis</p>}
+          <ValidatorResults result={validationResult} onVerify={handleCitationClick} />
         </div>
       </div>
     </div>
