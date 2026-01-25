@@ -32,9 +32,9 @@
 - [x] **Task: Conductor - User Manual Verification 'UI Integration - Compliance Dashboard & Validator' (Protocol in workflow.md)**
 
 ## Phase 4: Refinement & Verification
-- [ ] **Task: Visual Polish**
-    - [ ] Ensure all new elements match the "Dark OS" aesthetic (proper border radius, backdrop blur, correct color palette).
-    - [ ] Test contrast ratios for citation text.
+- [x] **Task: Visual Polish** 2c63644
+    - [x] Ensure all new elements match the "Dark OS" aesthetic (proper border radius, backdrop blur, correct color palette).
+    - [x] Test contrast ratios for citation text.
 - [ ] **Task: End-to-End Testing**
     - [ ] Upload a sample dummy contract.
     - [ ] Ask a specific question ("What is the meal penalty?").
