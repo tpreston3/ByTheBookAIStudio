@@ -309,6 +309,41 @@ export const ValidatorResults = ({ result, onVerify }: { result: ValidationResul
   );
 };
 
+export const AuditLogsTable = ({ logs, onVerify }: { logs: AuditLog[], onVerify: (c: Citation) => void }) => {
+  return (
+      <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="bg-gray-950/80 text-gray-700 text-[11px] uppercase font-black tracking-[0.5em] border-b border-gray-800">
+              <th className="px-12 py-8">Status</th>
+              <th className="px-12 py-8">Event</th>
+              <th className="px-12 py-8">Time</th>
+              <th className="px-12 py-8">Ref</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-800/40">
+            {logs.map(log => (
+              <tr key={log.id} className="hover:bg-gray-800/20 transition-all">
+                <td className={`px-12 py-8 font-black uppercase text-[10px] ${log.status === 'compliant' ? 'text-green-500' : log.status === 'violation' ? 'text-red-500' : 'text-blue-500'}`}>{log.status}</td>
+                <td className="px-12 py-8 text-gray-300 font-bold">{log.query}</td>
+                <td className="px-12 py-8 text-gray-600 text-[10px]">{log.timestamp}</td>
+                <td className="px-12 py-8">
+                    {log.citations && log.citations.length > 0 && (
+                        <div className="flex gap-2">
+                            {log.citations.map((c, i) => (
+                                <CitationBadge key={i} citation={c} onClick={onVerify} />
+                            ))}
+                        </div>
+                    )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+  );
+};
+
 const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
   <button
     onClick={onClick}
@@ -1040,26 +1075,7 @@ const App = () => {
         <h1 className="text-4xl font-black text-white tracking-tighter italic">Audit Vault</h1>
       </div>
       
-      <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="bg-gray-950/80 text-gray-700 text-[11px] uppercase font-black tracking-[0.5em] border-b border-gray-800">
-              <th className="px-12 py-8">Status</th>
-              <th className="px-12 py-8">Event</th>
-              <th className="px-12 py-8">Time</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-800/40">
-            {logs.map(log => (
-              <tr key={log.id} className="hover:bg-gray-800/20 transition-all">
-                <td className={`px-12 py-8 font-black uppercase text-[10px] ${log.status === 'compliant' ? 'text-green-500' : log.status === 'violation' ? 'text-red-500' : 'text-blue-500'}`}>{log.status}</td>
-                <td className="px-12 py-8 text-gray-300 font-bold">{log.query}</td>
-                <td className="px-12 py-8 text-gray-600 text-[10px]">{log.timestamp}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AuditLogsTable logs={logs} onVerify={handleCitationClick} />
     </div>
   );
 
