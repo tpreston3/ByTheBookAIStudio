@@ -187,6 +187,12 @@ export const parseCitations = (text: string): { content: string, citations: Cita
   return { content, citations };
 };
 
+export const resolveCitation = (citation: Citation, documents: UploadedFile[]): { doc: UploadedFile, term: string } | null => {
+  const doc = documents.find(d => d.name === citation.docId);
+  if (!doc) return null;
+  return { doc, term: citation.textSnippet };
+};
+
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -566,38 +572,30 @@ const App = () => {
     });
   };
 
-  const renderMessageContent = (content: string) => {
-    const docNames = project.documents.map(d => d.name);
-    if (docNames.length === 0) return content;
+  const handleCitationClick = (citation: Citation) => {
+    const resolution = resolveCitation(citation, project.documents);
+    if (resolution) {
+      setViewingDoc(resolution.doc);
+      setHighlightTerm(resolution.term);
+    }
+  };
 
-    const parts = content.split(/(\[.*?\])/g);
-    return parts.map((part, i) => {
-      const match = part.match(/^\[(.*?)\]$/);
-      if (match) {
-        const docName = match[1];
-        const foundDoc = project.documents.find(d => d.name === docName);
-        if (foundDoc) {
-          return (
-            <button
-              key={i}
-              onClick={() => {
-                setViewingDoc(foundDoc);
-                const contentIndex = content.indexOf(part);
-                const start = Math.max(0, contentIndex - 100);
-                const end = Math.min(content.length, contentIndex + part.length + 100);
-                const context = content.slice(start, end).replace(/\[.*?\]/g, '').trim();
-                setHighlightTerm(context);
-              }}
-              className="inline-flex items-center space-x-1 px-2.5 py-1 mx-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-lg text-[10px] font-black uppercase transition-all shadow-sm"
-            >
-              <FileText size={10} className="mr-0.5" />
-              <span>{docName}</span>
-            </button>
-          );
-        }
-      }
-      return part;
-    });
+  const renderMessageContent = (msg: Message) => {
+    return (
+      <div className="space-y-4">
+        <div className="whitespace-pre-wrap">{msg.content}</div>
+        {msg.citations && msg.citations.length > 0 && (
+          <div className="pt-4 border-t border-gray-800/50">
+            <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-3">Verified Sources</p>
+            <div className="flex flex-wrap gap-2">
+              {msg.citations.map((citation, i) => (
+                <CitationBadge key={i} citation={citation} onClick={handleCitationClick} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const HighlightedDocument = ({ doc, term }: { doc: UploadedFile, term: string }) => {
@@ -921,7 +919,7 @@ const App = () => {
               <div className={`max-w-[85%] rounded-[2.5rem] p-8 shadow-2xl ${
                 msg.role === 'user' ? 'bg-amber-600 text-white font-black text-sm' : 'bg-gray-900/80 border border-gray-800 text-gray-200'
               }`}>
-                {msg.isLoading ? <Loader2 className="animate-spin text-amber-500" size={24} /> : renderMessageContent(msg.content)}
+                {msg.isLoading ? <Loader2 className="animate-spin text-amber-500" size={24} /> : renderMessageContent(msg)}
               </div>
             </div>
           ))}
