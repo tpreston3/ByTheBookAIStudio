@@ -19,8 +19,8 @@
 - [x] **Task: Connect Chat to Document Viewer** 980c19f
     - [x] Write logic to handle clicks on `CitationBadge`.
     - [x] Ensure clicking opens the Document Viewer (`viewingDoc` state) and auto-scrolls/highlights the specific snippet.
-- [ ] **Task: Refine Chat Layout**
-    - [ ] Adjust `renderMessageContent` to render `CitationBadge` inline with text or as a footnote section at the bottom of the message bubble.
+- [x] **Task: Refine Chat Layout** 3d711f9
+    - [x] Adjust `renderMessageContent` to render `CitationBadge` inline with text or as a footnote section at the bottom of the message bubble.
 - [ ] **Task: Conductor - User Manual Verification 'UI Integration - Advisor Chat' (Protocol in workflow.md)**
 
 ## Phase 3: UI Integration - Compliance Dashboard & Validator
