@@ -16,9 +16,9 @@
 - [x] **Task: Create Citation Component** 4b45188
     - [x] Build `CitationBadge` component using Tailwind (Amber border/text, small, pill-shaped).
     - [x] Implement "Tooltip" behavior on hover to show the specific section/article name.
-- [ ] **Task: Connect Chat to Document Viewer**
-    - [ ] Write logic to handle clicks on `CitationBadge`.
-    - [ ] Ensure clicking opens the Document Viewer (`viewingDoc` state) and auto-scrolls/highlights the specific snippet.
+- [x] **Task: Connect Chat to Document Viewer** 980c19f
+    - [x] Write logic to handle clicks on `CitationBadge`.
+    - [x] Ensure clicking opens the Document Viewer (`viewingDoc` state) and auto-scrolls/highlights the specific snippet.
 - [ ] **Task: Refine Chat Layout**
     - [ ] Adjust `renderMessageContent` to render `CitationBadge` inline with text or as a footnote section at the bottom of the message bubble.
 - [ ] **Task: Conductor - User Manual Verification 'UI Integration - Advisor Chat' (Protocol in workflow.md)**
