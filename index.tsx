@@ -255,7 +255,7 @@ export const CitationBadge = ({ citation, onClick }: { citation: Citation, onCli
   <button
     onClick={() => onClick(citation)}
     title={citation.docId} // Basic tooltip
-    className="inline-flex items-center space-x-1 px-2.5 py-1 mx-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-lg text-[10px] font-black uppercase transition-all shadow-sm cursor-pointer"
+    className="inline-flex items-center space-x-1 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-sm cursor-pointer active:scale-95"
   >
     <FileText size={10} className="mr-0.5" />
     <span>{citation.sectionLabel}</span>
@@ -265,7 +265,7 @@ export const CitationBadge = ({ citation, onClick }: { citation: Citation, onCli
 export const ChatBubble = ({ message, onCitationClick }: { message: Message, onCitationClick: (c: Citation) => void }) => {
   return (
     <div className="space-y-4">
-      <div className="whitespace-pre-wrap">{message.content}</div>
+      <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
       {message.citations && message.citations.length > 0 && (
         <div className="pt-4 border-t border-gray-800/50">
           <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-3">Verified Sources</p>
@@ -284,21 +284,21 @@ export const ValidatorResults = ({ result, onVerify }: { result: ValidationResul
   if (!result) return <p className="text-gray-600 text-center py-20 uppercase font-black tracking-widest">Awaiting Analysis</p>;
 
   return (
-    <div className="space-y-8">
-      <div className={`p-10 rounded-[2rem] border-2 font-black italic text-4xl ${
+    <div className="space-y-8 backdrop-blur-3xl">
+      <div className={`p-10 rounded-[2.5rem] border-2 font-black italic text-4xl ${
         result.status === 'compliant' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 'border-red-500/20 text-red-500 bg-red-500/5'
       }`}>
         {result.status.toUpperCase()}
       </div>
       <div className="space-y-4">
         {result.issues.map((issue, i) => (
-          <div key={i} className="bg-gray-950 p-6 rounded-2xl border border-gray-800 flex justify-between items-start">
+          <div key={i} className="bg-gray-950/60 p-8 rounded-[2.5rem] border border-gray-800 flex justify-between items-start hover:border-amber-500/20 transition-all">
             <div>
-                <p className="text-blue-400 text-xs font-black uppercase mb-2">{issue.rule}</p>
-                <p className="text-gray-400 text-sm">{issue.description}</p>
+                <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2">{issue.rule}</p>
+                <p className="text-gray-400 text-sm leading-relaxed">{issue.description}</p>
             </div>
             {issue.source_reference && (
-                <div className="ml-4 shrink-0">
+                <div className="ml-6 shrink-0">
                     <CitationBadge citation={issue.source_reference} onClick={onVerify} />
                 </div>
             )}
@@ -311,7 +311,7 @@ export const ValidatorResults = ({ result, onVerify }: { result: ValidationResul
 
 export const AuditLogsTable = ({ logs, onVerify }: { logs: AuditLog[], onVerify: (c: Citation) => void }) => {
   return (
-      <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl">
+      <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-3xl">
         <table className="w-full text-left">
           <thead>
             <tr className="bg-gray-950/80 text-gray-700 text-[11px] uppercase font-black tracking-[0.5em] border-b border-gray-800">
