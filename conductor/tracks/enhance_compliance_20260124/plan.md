@@ -35,9 +35,9 @@
 - [x] **Task: Visual Polish** 2c63644
     - [x] Ensure all new elements match the "Dark OS" aesthetic (proper border radius, backdrop blur, correct color palette).
     - [x] Test contrast ratios for citation text.
-- [~] **Task: End-to-End Testing**
-    - [ ] Upload a sample dummy contract.
-    - [ ] Ask a specific question ("What is the meal penalty?").
-    - [ ] Verify the answer cites the specific section.
-    - [ ] Click the citation and verify the document viewer opens to the correct location.
+- [x] **Task: End-to-End Testing** c93f883
+    - [x] Upload a sample dummy contract.
+    - [x] Ask a specific question ("What is the meal penalty?").
+    - [x] Verify the answer cites the specific section.
+    - [x] Click the citation and verify the document viewer opens to the correct location.
 - [ ] **Task: Conductor - User Manual Verification 'Refinement & Verification' (Protocol in workflow.md)**
