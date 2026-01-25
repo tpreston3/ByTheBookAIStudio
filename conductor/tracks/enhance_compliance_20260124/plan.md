@@ -35,7 +35,7 @@
 - [x] **Task: Visual Polish** 2c63644
     - [x] Ensure all new elements match the "Dark OS" aesthetic (proper border radius, backdrop blur, correct color palette).
     - [x] Test contrast ratios for citation text.
-- [ ] **Task: End-to-End Testing**
+- [~] **Task: End-to-End Testing**
     - [ ] Upload a sample dummy contract.
     - [ ] Ask a specific question ("What is the meal penalty?").
     - [ ] Verify the answer cites the specific section.
