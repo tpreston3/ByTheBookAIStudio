@@ -4,12 +4,12 @@
 - [x] **Task: Define Citation Data Structures** <!-- e2dc9b1 -->
     - [x] Define `Citation` interface in `index.tsx` (docId, page, textSnippet, sectionLabel).
     - [x] Update `Message` and `AuditLog` interfaces to include `citations: Citation[]`.
-- [ ] **Task: Update AI Prompt Engineering for Chat**
-    - [ ] Modify `handleSendMessage` system instruction to request specific citation formats (e.g., XML tags or JSON blocks) embedded in the response.
-    - [ ] Implement a parser to extract these citations from the raw AI text stream and populate the `citations` array.
-- [ ] **Task: Update AI Prompt Engineering for Audit**
-    - [ ] Modify `handleValidateDealMemo` prompt to require `source_reference` fields for every identified issue.
-    - [ ] Verify that the returned JSON structure correctly maps to the new interface.
+- [x] **Task: Update AI Prompt Engineering for Chat** <!-- 4e5f913 -->
+    - [x] Modify `handleSendMessage` system instruction to request specific citation formats (e.g., XML tags or JSON blocks) embedded in the response.
+    - [x] Implement a parser to extract these citations from the raw AI text stream and populate the `citations` array.
+- [x] **Task: Update AI Prompt Engineering for Audit** <!-- 4e5f913 -->
+    - [x] Modify `handleValidateDealMemo` prompt to require `source_reference` fields for every identified issue.
+    - [x] Verify that the returned JSON structure correctly maps to the new interface.
 - [ ] **Task: Conductor - User Manual Verification 'Foundation - Citation Engine' (Protocol in workflow.md)**
 
 ## Phase 2: UI Integration - Advisor Chat
