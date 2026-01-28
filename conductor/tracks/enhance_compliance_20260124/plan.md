@@ -1,6 +1,6 @@
 # Implementation Plan - Enhance Compliance Analysis
 
-## Phase 1: Foundation - Citation Engine
+## Phase 1: Foundation - Citation Engine [checkpoint: 914004c]
 - [x] **Task: Define Citation Data Structures** <!-- e2dc9b1 -->
     - [x] Define `Citation` interface in `index.tsx` (docId, page, textSnippet, sectionLabel).
     - [x] Update `Message` and `AuditLog` interfaces to include `citations: Citation[]`.
@@ -10,7 +10,7 @@
 - [x] **Task: Update AI Prompt Engineering for Audit** <!-- 4e5f913 -->
     - [x] Modify `handleValidateDealMemo` prompt to require `source_reference` fields for every identified issue.
     - [x] Verify that the returned JSON structure correctly maps to the new interface.
-- [ ] **Task: Conductor - User Manual Verification 'Foundation - Citation Engine' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Foundation - Citation Engine' (Protocol in workflow.md)** <!-- 914004c -->**
 
 ## Phase 2: UI Integration - Advisor Chat
 - [ ] **Task: Create Citation Component**
