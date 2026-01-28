@@ -24,11 +24,11 @@
 - [x] **Task: Conductor - User Manual Verification 'UI Integration - Advisor Chat' (Protocol in workflow.md)** <!-- 640c192 -->
 
 ## Phase 3: UI Integration - Compliance Dashboard & Validator
-- [ ] **Task: Update Validator Output**
-    - [ ] Modify the "Audit Engine" results view to display citations next to each "Rule" violation.
-    - [ ] Add a "Verify" button to each issue that opens the source document.
-- [ ] **Task: Enhance Audit Logs**
-    - [ ] Update the `logs` table to include a column or expandable detail view showing the primary citation for the decision.
+- [x] **Task: Update Validator Output** <!-- 640c192 -->
+    - [x] Modify the "Audit Engine" results view to display citations next to each "Rule" violation.
+    - [x] Add a "Verify" button to each issue that opens the source document.
+- [x] **Task: Enhance Audit Logs** <!-- 640c192 -->
+    - [x] Update the `logs` table to include a column or expandable detail view showing the primary citation for the decision.
 - [ ] **Task: Conductor - User Manual Verification 'UI Integration - Compliance Dashboard & Validator' (Protocol in workflow.md)**
 
 ## Phase 4: Refinement & Verification
