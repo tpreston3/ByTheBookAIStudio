@@ -663,6 +663,14 @@ const App = () => {
   };
 
   const HighlightedDocument = ({ doc, term }: { doc: UploadedFile, term: string }) => {
+    const highlightRef = useRef<HTMLSpanElement>(null);
+
+    useEffect(() => {
+      if (highlightRef.current) {
+        highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, [term]);
+
     if (!doc.content) return <div className="p-12 text-center text-gray-700"><p>Binary preview unavailable.</p></div>;
     const text = doc.content;
     const termWords = term.split(/[\s,.;:]+/).filter(w => w.length > 4).slice(0, 4);
@@ -693,7 +701,7 @@ const App = () => {
         <div className="whitespace-pre-wrap">
           {segments.map((part, i) => (
             part === matchedText ? 
-              <span key={i} className="bg-amber-500/30 text-amber-100 border-b-2 border-amber-500 font-bold px-1.5 py-0.5 rounded animate-pulse">{part}</span> : 
+              <span key={i} ref={highlightRef} className="bg-amber-500/30 text-amber-100 border-b-2 border-amber-500 font-bold px-1.5 py-0.5 rounded animate-pulse">{part}</span> : 
               part
           ))}
         </div>
