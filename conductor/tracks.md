@@ -4,8 +4,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-<<<<<<< HEAD
-- [ ] **Track: Enhance Compliance Analysis with Detailed Citation Mapping and UI Refinement.**
+- [~] **Track: Enhance Compliance Analysis with Detailed Citation Mapping and UI Refinement.**
   *Link: [./tracks/enhance_compliance_20260124/](./tracks/enhance_compliance_20260124/)*
-=======
->>>>>>> 5ec0d286c52f3457f7962a6b29b7ae7603fe1fe4
+
+---
+
+- [ ] **Track: Multi-Project Management & Enhanced Analysis**
+*Link: [./tracks/multi_project_20260127/](./tracks/multi_project_20260127/)*
