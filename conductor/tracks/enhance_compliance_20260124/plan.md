@@ -12,7 +12,7 @@
     - [x] Verify that the returned JSON structure correctly maps to the new interface.
 - [x] **Task: Conductor - User Manual Verification 'Foundation - Citation Engine' (Protocol in workflow.md)** <!-- 914004c -->**
 
-## Phase 2: UI Integration - Advisor Chat
+## Phase 2: UI Integration - Advisor Chat [checkpoint: 640c192]
 - [x] **Task: Create Citation Component** <!-- 0b5e6d0 -->
     - [x] Build `CitationBadge` component using Tailwind (Amber border/text, small, pill-shaped).
     - [x] Implement "Tooltip" behavior on hover to show the specific section/article name.
@@ -21,7 +21,7 @@
     - [x] Ensure clicking opens the Document Viewer (`viewingDoc` state) and auto-scrolls/highlights the specific snippet.
 - [x] **Task: Refine Chat Layout** <!-- 878f80a -->
     - [x] Adjust `renderMessageContent` to render `CitationBadge` inline with text or as a footnote section at the bottom of the message bubble.
-- [ ] **Task: Conductor - User Manual Verification 'UI Integration - Advisor Chat' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'UI Integration - Advisor Chat' (Protocol in workflow.md)** <!-- 640c192 -->
 
 ## Phase 3: UI Integration - Compliance Dashboard & Validator
 - [ ] **Task: Update Validator Output**
