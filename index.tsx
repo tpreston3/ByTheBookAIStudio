@@ -46,7 +46,7 @@ import {
 
 // --- Types ---
 
-interface UploadedFile {
+export interface UploadedFile {
   name: string;
   type: string;
   content?: string; 
@@ -54,7 +54,7 @@ interface UploadedFile {
   size: number;
 }
 
-interface ProjectContext {
+export interface ProjectContext {
   name: string;
   productionType: string;
   budgetAmount: string;
@@ -69,18 +69,39 @@ interface ProjectContext {
   documents: UploadedFile[];
 }
 
-interface Message {
+export interface Citation {
+  docId: string;
+  page: number;
+  textSnippet: string;
+  sectionLabel: string;
+}
+
+export interface Message {
   role: 'user' | 'assistant';
   content: string;
-  citations?: string[];
+  citations?: Citation[];
   isLoading?: boolean;
 }
 
-interface AuditLog {
+export interface AuditLog {
   id: string;
   timestamp: string;
   query: string;
   status: 'compliant' | 'violation' | 'info';
+  citations?: Citation[];
+}
+
+export interface ValidationIssue {
+  rule: string;
+  description: string;
+  severity: 'high' | 'medium' | 'low';
+  source_reference?: Citation;
+}
+
+export interface ValidationResult {
+  status: 'compliant' | 'warning' | 'violation';
+  issues: ValidationIssue[];
+  summary: string;
 }
 
 // --- Constants ---
@@ -115,6 +136,62 @@ const STORAGE_KEY = 'bythebook_project_setup_v6';
 const MAX_TEXT_TOKENS_CHARS = 150000; 
 
 // --- Utilities ---
+
+export const constructAuditPrompt = (context: any) => {
+  return `
+        PERFORM COMPLIANCE AUDIT ON THE ATTACHED DEAL MEMO.
+        Context: ${context.name} in ${context.location} with a budget of $${context.budgetAmount}.
+        Dates: ${context.startDate} to ${context.endDate}.
+        Check against ${context.unions.join(', ')} master agreements.
+        Identify:
+        1. Meal Penalty violations.
+        2. Rest period insufficiencies.
+        3. Rate discrepancies.
+        4. Health/Pension requirements.
+
+        Return JSON ONLY:
+        {
+          "status": "compliant" | "warning" | "violation",
+          "issues": [
+            {
+              "rule": "string",
+              "description": "string",
+              "severity": "high" | "medium" | "low",
+              "source_reference": {
+                "docId": "string",
+                "page": "number",
+                "textSnippet": "string",
+                "sectionLabel": "string"
+              }
+            }
+          ],
+          "summary": "string"
+        }
+      `;
+};
+
+export const parseCitations = (text: string): { content: string, citations: Citation[] } => {
+  const citations: Citation[] = [];
+  const citationRegex = /<CITATION>([\s\S]*?)<\/CITATION>/g;
+  
+  const content = text.replace(citationRegex, (match, json) => {
+    try {
+      const citation = JSON.parse(json);
+      citations.push(citation);
+    } catch (e) {
+      console.error('Failed to parse citation JSON', e);
+    }
+    return ''; // Remove the citation block from the content
+  });
+
+  return { content, citations };
+};
+
+export const resolveCitation = (citation: Citation, documents: UploadedFile[]): { doc: UploadedFile, term: string } | null => {
+  const doc = documents.find(d => d.name === citation.docId);
+  if (!doc) return null;
+  return { doc, term: citation.textSnippet };
+};
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -173,6 +250,99 @@ const extractTextFromFile = async (file: File): Promise<string> => {
 };
 
 // --- Components ---
+
+export const CitationBadge = ({ citation, onClick }: { citation: Citation, onClick: (c: Citation) => void }) => (
+  <button
+    onClick={() => onClick(citation)}
+    title={citation.docId} // Basic tooltip
+    className="inline-flex items-center space-x-1 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all shadow-sm cursor-pointer active:scale-95"
+  >
+    <FileText size={10} className="mr-0.5" />
+    <span>{citation.sectionLabel}</span>
+  </button>
+);
+
+export const ChatBubble = ({ message, onCitationClick }: { message: Message, onCitationClick: (c: Citation) => void }) => {
+  return (
+    <div className="space-y-4">
+      <div className="whitespace-pre-wrap leading-relaxed">{message.content}</div>
+      {message.citations && message.citations.length > 0 && (
+        <div className="pt-4 border-t border-gray-800/50">
+          <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-3">Verified Sources</p>
+          <div className="flex flex-wrap gap-2">
+            {message.citations.map((citation, i) => (
+              <CitationBadge key={i} citation={citation} onClick={onCitationClick} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const ValidatorResults = ({ result, onVerify }: { result: ValidationResult | null, onVerify: (c: Citation) => void }) => {
+  if (!result) return <p className="text-gray-600 text-center py-20 uppercase font-black tracking-widest">Awaiting Analysis</p>;
+
+  return (
+    <div className="space-y-8 backdrop-blur-3xl">
+      <div className={`p-10 rounded-[2.5rem] border-2 font-black italic text-4xl ${
+        result.status === 'compliant' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 'border-red-500/20 text-red-500 bg-red-500/5'
+      }`}>
+        {result.status.toUpperCase()}
+      </div>
+      <div className="space-y-4">
+        {result.issues.map((issue, i) => (
+          <div key={i} className="bg-gray-950/60 p-8 rounded-[2.5rem] border border-gray-800 flex justify-between items-start hover:border-amber-500/20 transition-all">
+            <div>
+                <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2">{issue.rule}</p>
+                <p className="text-gray-400 text-sm leading-relaxed">{issue.description}</p>
+            </div>
+            {issue.source_reference && (
+                <div className="ml-6 shrink-0">
+                    <CitationBadge citation={issue.source_reference} onClick={onVerify} />
+                </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export const AuditLogsTable = ({ logs, onVerify }: { logs: AuditLog[], onVerify: (c: Citation) => void }) => {
+  return (
+      <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-3xl">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="bg-gray-950/80 text-gray-700 text-[11px] uppercase font-black tracking-[0.5em] border-b border-gray-800">
+              <th className="px-12 py-8">Status</th>
+              <th className="px-12 py-8">Event</th>
+              <th className="px-12 py-8">Time</th>
+              <th className="px-12 py-8">Ref</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-800/40">
+            {logs.map(log => (
+              <tr key={log.id} className="hover:bg-gray-800/20 transition-all">
+                <td className={`px-12 py-8 font-black uppercase text-[10px] ${log.status === 'compliant' ? 'text-green-500' : log.status === 'violation' ? 'text-red-500' : 'text-blue-500'}`}>{log.status}</td>
+                <td className="px-12 py-8 text-gray-300 font-bold">{log.query}</td>
+                <td className="px-12 py-8 text-gray-600 text-[10px]">{log.timestamp}</td>
+                <td className="px-12 py-8">
+                    {log.citations && log.citations.length > 0 && (
+                        <div className="flex gap-2">
+                            {log.citations.map((c, i) => (
+                                <CitationBadge key={i} citation={c} onClick={onVerify} />
+                            ))}
+                        </div>
+                    )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+  );
+};
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
   <button
@@ -252,7 +422,7 @@ const App = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [validatorInput, setValidatorInput] = useState('');
   const [selectedValidatorFile, setSelectedValidatorFile] = useState<UploadedFile | null>(null);
-  const [validationResult, setValidationResult] = useState<any>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
 
   const [viewingDoc, setViewingDoc] = useState<UploadedFile | null>(null);
   const [highlightTerm, setHighlightTerm] = useState<string>('');
@@ -373,6 +543,17 @@ const App = () => {
         Analyze the query and find specific answers within the provided contracts. 
         Always provide section-level citations and mention document names in brackets like [DocumentName.pdf].
         Use a professional, legal, and compliance-oriented tone.
+
+        CITATION FORMAT:
+        When you find a specific clause or rule, you MUST include a machine-readable citation block at the end of your response (or after the relevant paragraph) in the following format:
+        <CITATION>
+        {
+          "docId": "exact_document_name.pdf",
+          "page": 12,
+          "textSnippet": "exact text from document",
+          "sectionLabel": "Article 12.A"
+        }
+        </CITATION>
       `;
 
       // CRITICAL: We prioritize text content to avoid token overflow. 
@@ -396,8 +577,10 @@ const App = () => {
         config: { systemInstruction, temperature: 0.15 }
       });
 
-      const text = response.text || "I was unable to retrieve a definitive answer from the current documents.";
-      setMessages(prev => [...prev.slice(0, -1), { role: 'assistant', content: text }]);
+      const rawText = response.text || "I was unable to retrieve a definitive answer from the current documents.";
+      const { content, citations } = parseCitations(rawText);
+      
+      setMessages(prev => [...prev.slice(0, -1), { role: 'assistant', content, citations }]);
       setLogs(prev => [{ id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toLocaleTimeString(), query, status: 'info' }, ...prev]);
     } catch (error: any) {
       console.error(error);
@@ -419,24 +602,7 @@ const App = () => {
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const prompt = `
-        PERFORM COMPLIANCE AUDIT ON THE ATTACHED DEAL MEMO.
-        Context: ${project.name} in ${project.location} with a budget of $${project.budgetAmount}.
-        Dates: ${project.startDate} to ${project.endDate}.
-        Check against ${project.unions.join(', ')} master agreements.
-        Identify:
-        1. Meal Penalty violations.
-        2. Rest period insufficiencies.
-        3. Rate discrepancies.
-        4. Health/Pension requirements.
-
-        Return JSON ONLY:
-        {
-          "status": "compliant" | "warning" | "violation",
-          "issues": [{"rule": "string", "description": "string", "severity": "high" | "medium" | "low"}],
-          "summary": "string"
-        }
-      `;
+      const prompt = constructAuditPrompt(project);
 
       const parts: any[] = [];
       // Use text only for reference docs
@@ -488,38 +654,12 @@ const App = () => {
     });
   };
 
-  const renderMessageContent = (content: string) => {
-    const docNames = project.documents.map(d => d.name);
-    if (docNames.length === 0) return content;
-
-    const parts = content.split(/(\[.*?\])/g);
-    return parts.map((part, i) => {
-      const match = part.match(/^\[(.*?)\]$/);
-      if (match) {
-        const docName = match[1];
-        const foundDoc = project.documents.find(d => d.name === docName);
-        if (foundDoc) {
-          return (
-            <button
-              key={i}
-              onClick={() => {
-                setViewingDoc(foundDoc);
-                const contentIndex = content.indexOf(part);
-                const start = Math.max(0, contentIndex - 100);
-                const end = Math.min(content.length, contentIndex + part.length + 100);
-                const context = content.slice(start, end).replace(/\[.*?\]/g, '').trim();
-                setHighlightTerm(context);
-              }}
-              className="inline-flex items-center space-x-1 px-2.5 py-1 mx-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 rounded-lg text-[10px] font-black uppercase transition-all shadow-sm"
-            >
-              <FileText size={10} className="mr-0.5" />
-              <span>{docName}</span>
-            </button>
-          );
-        }
-      }
-      return part;
-    });
+  const handleCitationClick = (citation: Citation) => {
+    const resolution = resolveCitation(citation, project.documents);
+    if (resolution) {
+      setViewingDoc(resolution.doc);
+      setHighlightTerm(resolution.term);
+    }
   };
 
   const HighlightedDocument = ({ doc, term }: { doc: UploadedFile, term: string }) => {
@@ -843,7 +983,7 @@ const App = () => {
               <div className={`max-w-[85%] rounded-[2.5rem] p-8 shadow-2xl ${
                 msg.role === 'user' ? 'bg-amber-600 text-white font-black text-sm' : 'bg-gray-900/80 border border-gray-800 text-gray-200'
               }`}>
-                {msg.isLoading ? <Loader2 className="animate-spin text-amber-500" size={24} /> : renderMessageContent(msg.content)}
+                {msg.isLoading ? <Loader2 className="animate-spin text-amber-500" size={24} /> : <ChatBubble message={msg} onCitationClick={handleCitationClick} />}
               </div>
             </div>
           ))}
@@ -923,23 +1063,7 @@ const App = () => {
           </button>
         </div>
         <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] p-12 overflow-y-auto custom-scrollbar">
-          {validationResult ? (
-            <div className="space-y-8">
-              <div className={`p-10 rounded-[2rem] border-2 font-black italic text-4xl ${
-                validationResult.status === 'compliant' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 'border-red-500/20 text-red-500 bg-red-500/5'
-              }`}>
-                {validationResult.status.toUpperCase()}
-              </div>
-              <div className="space-y-4">
-                {validationResult.issues.map((issue: any, i: number) => (
-                  <div key={i} className="bg-gray-950 p-6 rounded-2xl border border-gray-800">
-                    <p className="text-blue-400 text-xs font-black uppercase mb-2">{issue.rule}</p>
-                    <p className="text-gray-400 text-sm">{issue.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : <p className="text-gray-600 text-center py-20 uppercase font-black tracking-widest">Awaiting Analysis</p>}
+          <ValidatorResults result={validationResult} onVerify={handleCitationClick} />
         </div>
       </div>
     </div>
@@ -951,26 +1075,7 @@ const App = () => {
         <h1 className="text-4xl font-black text-white tracking-tighter italic">Audit Vault</h1>
       </div>
       
-      <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="bg-gray-950/80 text-gray-700 text-[11px] uppercase font-black tracking-[0.5em] border-b border-gray-800">
-              <th className="px-12 py-8">Status</th>
-              <th className="px-12 py-8">Event</th>
-              <th className="px-12 py-8">Time</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-800/40">
-            {logs.map(log => (
-              <tr key={log.id} className="hover:bg-gray-800/20 transition-all">
-                <td className={`px-12 py-8 font-black uppercase text-[10px] ${log.status === 'compliant' ? 'text-green-500' : log.status === 'violation' ? 'text-red-500' : 'text-blue-500'}`}>{log.status}</td>
-                <td className="px-12 py-8 text-gray-300 font-bold">{log.query}</td>
-                <td className="px-12 py-8 text-gray-600 text-[10px]">{log.timestamp}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AuditLogsTable logs={logs} onVerify={handleCitationClick} />
     </div>
   );
 
