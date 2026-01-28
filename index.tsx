@@ -550,7 +550,7 @@ const App = () => {
         {
           "docId": "exact_document_name.pdf",
           "page": 12,
-          "textSnippet": "exact text from document",
+          "textSnippet": "verbatim copy of the text from the document - do not summarize or alter",
           "sectionLabel": "Article 12.A"
         }
         </CITATION>
@@ -666,24 +666,49 @@ const App = () => {
     const highlightRef = useRef<HTMLSpanElement>(null);
 
     useEffect(() => {
-      if (highlightRef.current) {
-        highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, [term]);
+      // Small delay to ensure rendering is complete
+      const timer = setTimeout(() => {
+        if (highlightRef.current) {
+          highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }, [term, doc]); // Re-run if doc or term changes
 
     if (!doc.content) return <div className="p-12 text-center text-gray-700"><p>Binary preview unavailable.</p></div>;
     const text = doc.content;
-    const termWords = term.split(/[\s,.;:]+/).filter(w => w.length > 4).slice(0, 4);
-    const highlightPattern = termWords.length > 0 ? termWords.join('.*?') : term.split(' ').slice(0, 3).join('.*?');
+    
+    // Improved matching strategy
+    const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const normalize = (s: string) => s.replace(/\s+/g, ' ').trim();
+    
+    const cleanTerm = normalize(term);
+    const words = cleanTerm.split(' ');
+    
+    let highlightPattern = '';
+    
+    if (words.length > 20) {
+       // For long snippets, match start (first 8 words) ... end (last 8 words)
+       const start = words.slice(0, 8).map(escapeRegExp).join('[\\s\\S]{0,20}?');
+       const end = words.slice(-8).map(escapeRegExp).join('[\\s\\S]{0,20}?');
+       highlightPattern = `${start}[\\s\\S]+?${end}`;
+    } else {
+       // For shorter snippets, match all words with flexible spacing
+       highlightPattern = words.map(escapeRegExp).join('[\\s\\S]{0,50}?');
+    }
     
     let segments: string[] = [text];
     let matchedText = "";
-    if (highlightPattern) {
+    
+    if (cleanTerm.length > 0) {
       try {
         const regex = new RegExp(`(${highlightPattern})`, 'gi');
-        segments = text.split(regex);
         const match = text.match(regex);
-        if (match) matchedText = match[0];
+        if (match) {
+           matchedText = match[0];
+           segments = text.split(regex);
+        }
+        // Removed single-word fallback to prevent incorrect highlighting
       } catch (e) { segments = [text]; }
     }
 
@@ -700,7 +725,14 @@ const App = () => {
         </div>
         <div className="whitespace-pre-wrap">
           {segments.map((part, i) => (
-            part === matchedText ? 
+            // Check if this part matches our found text. 
+            // Note: split includes separators. If we have multiple matches, we might highlight all or just the one we found.
+            // Using strict equality to matchedText might fail if there are multiple identical matches.
+            // We'll trust the split behavior for now, but simple `part === matchedText` is decent for first occurrence.
+            // A better way is to alternate: even indices are text, odd are matches (if we used capturing group).
+            // MDN: If separator is a regex with capturing parentheses, then each time separator matches, the results (including any undefined results) of the capturing parentheses are spliced into the output array.
+            // So: [text, match, text, match, text]
+            (i % 2 === 1) ? 
               <span key={i} ref={highlightRef} className="bg-amber-500/30 text-amber-100 border-b-2 border-amber-500 font-bold px-1.5 py-0.5 rounded animate-pulse">{part}</span> : 
               part
           ))}
