@@ -149,6 +149,10 @@ export const constructAuditPrompt = (context: any) => {
         3. Rate discrepancies.
         4. Health/Pension requirements.
 
+        IMPORTANT: For every issue identified, the "source_reference" MUST point to the specific Reference Document (Union Contract) where the rule is defined. 
+        The "docId" in the "source_reference" MUST be the exact filename of the Reference Document provided. 
+        DO NOT cite the "Deal Memo" as the source reference.
+
         Return JSON ONLY:
         {
           "status": "compliant" | "warning" | "violation",
@@ -160,7 +164,7 @@ export const constructAuditPrompt = (context: any) => {
               "source_reference": {
                 "docId": "string",
                 "page": "number",
-                "textSnippet": "string",
+                "textSnippet": "verbatim text from the UNION CONTRACT (not the deal memo)",
                 "sectionLabel": "string"
               }
             }
@@ -632,7 +636,19 @@ const App = () => {
 
       const result = JSON.parse(response.text || '{}');
       setValidationResult(result);
-      setLogs(prev => [{ id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toLocaleTimeString(), query: "Audit: " + (selectedValidatorFile?.name || "Text Segment"), status: result.status === 'violation' ? 'violation' : 'compliant' }, ...prev]);
+      
+      // Collect all citations from issues to save in the log
+      const auditCitations = result.issues
+        ?.map((i: any) => i.source_reference)
+        .filter((c: any) => c !== undefined && c !== null) || [];
+
+      setLogs(prev => [{ 
+          id: Math.random().toString(36).substr(2, 9), 
+          timestamp: new Date().toLocaleTimeString(), 
+          query: "Audit: " + (selectedValidatorFile?.name || "Text Segment"), 
+          status: result.status === 'violation' ? 'violation' : 'compliant',
+          citations: auditCitations 
+      }, ...prev]);
     } catch (error: any) {
       console.error(error);
       setValidationResult({ 
@@ -654,11 +670,39 @@ const App = () => {
     });
   };
 
+  // Robust citation resolution
+  const resolveCitationRobust = (citation: Citation, documents: UploadedFile[]) => {
+     // Helper to strip extension
+     const stripExt = (s: string) => s.replace(/\.[^/.]+$/, "");
+     
+     // 1. Exact match
+     let match = documents.find(d => d.name === citation.docId);
+     
+     // 2. Case-insensitive
+     if (!match) {
+        match = documents.find(d => d.name.toLowerCase() === citation.docId.toLowerCase());
+     }
+     
+     // 3. Ignore extensions (e.g. "contract" matches "contract.pdf")
+     if (!match) {
+         match = documents.find(d => stripExt(d.name).toLowerCase() === stripExt(citation.docId).toLowerCase());
+     }
+
+     // 4. Fuzzy contains (if AI omitted extension or part of name)
+     if (!match) {
+        match = documents.find(d => d.name.includes(citation.docId) || citation.docId.includes(d.name));
+     }
+     
+     return match ? { doc: match, term: citation.textSnippet } : null;
+  };
+
   const handleCitationClick = (citation: Citation) => {
-    const resolution = resolveCitation(citation, project.documents);
+    const resolution = resolveCitationRobust(citation, project.documents);
     if (resolution) {
       setViewingDoc(resolution.doc);
       setHighlightTerm(resolution.term);
+    } else {
+        console.warn("Could not resolve docId:", citation.docId);
     }
   };
 
@@ -1049,23 +1093,6 @@ const App = () => {
           </div>
         </div>
       </div>
-
-      <div className={`fixed top-0 right-0 h-full bg-[#080808] border-l border-gray-800/50 shadow-2xl z-50 transition-all duration-700 ${viewingDoc ? 'w-1/2 translate-x-0' : 'w-1/2 translate-x-full'}`}>
-        {viewingDoc && (
-          <div className="flex flex-col h-full">
-            <div className="px-10 py-8 border-b border-gray-800 bg-gray-950 flex justify-between items-center shrink-0">
-               <div className="flex items-center space-x-4">
-                  <BookOpen size={24} className="text-amber-500" />
-                  <h3 className="text-lg font-black text-white truncate max-w-sm">{viewingDoc.name}</h3>
-               </div>
-               <button onClick={() => setViewingDoc(null)} className="text-gray-600 hover:text-white"><X size={24} /></button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
-               <HighlightedDocument doc={viewingDoc} term={highlightTerm} />
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 
@@ -1077,17 +1104,31 @@ const App = () => {
           <FileUploadZone 
             onFilesAdded={async (files) => {
               const file = files[0];
+              if (!file) return;
+              
+              // Set generic file info immediately so UI updates
+              setSelectedValidatorFile({ name: file.name, type: file.type, size: file.size, content: '' });
+
               const content = await extractTextFromFile(file);
               const isPdf = file.type === 'application/pdf' || file.name.endsWith('.pdf');
+              let base64;
               if (isPdf) {
-                const base64 = await fileToBase64(file);
-                setSelectedValidatorFile({ name: file.name, type: file.type, base64, content, size: file.size });
-              } else {
-                setSelectedValidatorFile({ name: file.name, type: file.type, content, size: file.size });
+                base64 = await fileToBase64(file);
               }
+              
+              // Update with content
+              setSelectedValidatorFile(prev => prev ? { ...prev, content, base64 } : null);
             }} 
             acceptedTypes=".pdf,.docx,.txt"
           />
+          {selectedValidatorFile && (
+              <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl flex justify-between items-center">
+                  <span className="text-blue-200 text-sm font-bold flex items-center gap-2">
+                      <FileText size={16}/> {selectedValidatorFile.name}
+                  </span>
+                  <button onClick={() => setSelectedValidatorFile(null)} className="text-blue-400 hover:text-white"><X size={16}/></button>
+              </div>
+          )}
           <textarea 
             value={validatorInput}
             onChange={(e) => { setValidatorInput(e.target.value); setSelectedValidatorFile(null); }}
@@ -1152,6 +1193,24 @@ const App = () => {
         {activeTab === 'chat' && renderChat()}
         {activeTab === 'validator' && renderValidator()}
         {activeTab === 'logs' && renderLogs()}
+
+        {/* Global Document Viewer Drawer */}
+        <div className={`fixed top-0 right-0 h-full bg-[#080808] border-l border-gray-800/50 shadow-2xl z-50 transition-all duration-700 ${viewingDoc ? 'w-1/2 translate-x-0' : 'w-1/2 translate-x-full'}`}>
+          {viewingDoc && (
+            <div className="flex flex-col h-full">
+              <div className="px-10 py-8 border-b border-gray-800 bg-gray-950 flex justify-between items-center shrink-0">
+                 <div className="flex items-center space-x-4">
+                    <BookOpen size={24} className="text-amber-500" />
+                    <h3 className="text-lg font-black text-white truncate max-w-sm">{viewingDoc.name}</h3>
+                 </div>
+                 <button onClick={() => setViewingDoc(null)} className="text-gray-600 hover:text-white"><X size={24} /></button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
+                 <HighlightedDocument doc={viewingDoc} term={highlightTerm} />
+              </div>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

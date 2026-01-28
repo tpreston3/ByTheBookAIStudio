@@ -24,3 +24,4 @@ dist-ssr
 *.sw?
 
 *.zip
+tests/Error_Capture.JPG

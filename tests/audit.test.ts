@@ -17,7 +17,7 @@ describe('Audit Prompt Engineering', () => {
     expect(prompt).toContain('"source_reference":');
     expect(prompt).toContain('"docId": "string"');
     expect(prompt).toContain('"page": "number"');
-    expect(prompt).toContain('"textSnippet": "string"');
+    expect(prompt).toContain('"textSnippet": "verbatim text from the UNION CONTRACT (not the deal memo)"');
     expect(prompt).toContain('"sectionLabel": "string"');
   });
 
