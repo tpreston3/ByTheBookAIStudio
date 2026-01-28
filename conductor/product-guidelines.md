@@ -13,7 +13,7 @@
 - **Existing Aesthetic Preservation:** Maintain the current high-end, "Dark OS" visual style established in the codebase.
 - **Color Palette:**
     - **Primary Background:** Deep Black (`#050505`).
-    - **Accent Color:** Amber (`amber-500` / `amber-600`) for primary actions, search highlights, and critical emphasis.
+    - **Accent Color:** Amber (`amber-500` / `amber-600`) for primary actions, search highlights, citation interactive badges, and critical emphasis.
     - **Secondary/Neutral:** Slate Gray and Corporate Navy for borders, sidebar elements, and secondary status indicators.
 - **Design Elements:**
     - **Rounding:** Use aggressive, soft rounding for containers (`rounded-[2.5rem]` or larger) to maintain the modern, bespoke feel.

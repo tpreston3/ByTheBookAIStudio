@@ -19,10 +19,7 @@
 - **Environment:** Node.js (Development)
 - **Persistence:** Browser LocalStorage (for project setup and persistence)
 - **Deployment:** Integrated with AI Studio
-<<<<<<< HEAD
-=======
 
 ## Testing
 - **Unit/Integration:** Vitest
 - **Library:** React Testing Library
->>>>>>> 5ec0d286c52f3457f7962a6b29b7ae7603fe1fe4
