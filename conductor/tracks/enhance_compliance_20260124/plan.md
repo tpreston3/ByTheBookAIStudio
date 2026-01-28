@@ -31,7 +31,7 @@
     - [x] Update the `logs` table to include a column or expandable detail view showing the primary citation for the decision.
 - [x] **Task: Conductor - User Manual Verification 'UI Integration - Compliance Dashboard & Validator' (Protocol in workflow.md)** <!-- 16184c7 -->
 
-## Phase 4: Refinement & Verification
+## Phase 4: Refinement & Verification [checkpoint: 697b584]
 - [x] **Task: Visual Polish** <!-- 640c192 -->
     - [x] Ensure all new elements match the "Dark OS" aesthetic (proper border radius, backdrop blur, correct color palette).
     - [x] Test contrast ratios for citation text.
@@ -40,4 +40,4 @@
     - [x] Ask a specific question ("What is the meal penalty?").
     - [x] Verify the answer cites the specific section.
     - [x] Click the citation and verify the document viewer opens to the correct location.
-- [ ] **Task: Conductor - User Manual Verification 'Refinement & Verification' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Refinement & Verification' (Protocol in workflow.md)** <!-- 697b584 -->
