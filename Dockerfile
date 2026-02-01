@@ -13,10 +13,10 @@ RUN npm ci
 COPY . .
 
 # Build the application
-# Note: If you need to embed environment variables at build time,
-# use ARG and passed them in the build command.
-# ARG GEMINI_API_KEY
-# ENV GEMINI_API_KEY=$GEMINI_API_KEY
+# Accept the API key as a build argument
+ARG GEMINI_API_KEY
+# Set it as an environment variable so Vite can access it during build
+ENV GEMINI_API_KEY=$GEMINI_API_KEY
 RUN npm run build
 
 # Production stage
