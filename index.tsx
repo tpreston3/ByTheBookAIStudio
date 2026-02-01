@@ -1,40 +1,40 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
-import { 
-  GoogleGenAI, 
-  Type, 
-  GenerateContentResponse 
+import {
+  GoogleGenAI,
+  Type,
+  GenerateContentResponse
 } from "@google/genai";
-import { 
-  ShieldCheck, 
-  Search, 
-  FileText, 
-  Settings, 
-  MessageSquare, 
-  AlertCircle, 
-  CheckCircle2, 
-  ChevronRight, 
-  History, 
-  Upload, 
-  Scale, 
-  Plus, 
-  ArrowRight, 
-  Database, 
-  Users, 
-  X, 
-  FileCode, 
-  FileSearch, 
-  Loader2, 
-  FileDigit, 
-  Filter, 
-  Sparkles, 
-  Info, 
-  ExternalLink, 
-  BookOpen, 
-  Maximize2, 
-  ChevronLeft, 
-  Calendar, 
+import {
+  ShieldCheck,
+  Search,
+  FileText,
+  Settings,
+  MessageSquare,
+  AlertCircle,
+  CheckCircle2,
+  ChevronRight,
+  History,
+  Upload,
+  Scale,
+  Plus,
+  ArrowRight,
+  Database,
+  Users,
+  X,
+  FileCode,
+  FileSearch,
+  Loader2,
+  FileDigit,
+  Filter,
+  Sparkles,
+  Info,
+  ExternalLink,
+  BookOpen,
+  Maximize2,
+  ChevronLeft,
+  Calendar,
   Share2,
   DollarSign,
   Clock,
@@ -49,8 +49,8 @@ import {
 export interface UploadedFile {
   name: string;
   type: string;
-  content?: string; 
-  base64?: string;  
+  content?: string;
+  base64?: string;
   size: number;
 }
 
@@ -133,7 +133,7 @@ const UNION_OPTIONS = [
 const STORAGE_KEY = 'bythebook_project_setup_v6';
 // Max characters per document to prevent exceeding token limits. 
 // 150k chars is approx 35k-40k tokens. 
-const MAX_TEXT_TOKENS_CHARS = 150000; 
+const MAX_TEXT_TOKENS_CHARS = 150000;
 
 // --- Utilities ---
 
@@ -177,7 +177,7 @@ export const constructAuditPrompt = (context: any) => {
 export const parseCitations = (text: string): { content: string, citations: Citation[] } => {
   const citations: Citation[] = [];
   const citationRegex = /<CITATION>([\s\S]*?)<\/CITATION>/g;
-  
+
   const content = text.replace(citationRegex, (match, json) => {
     try {
       const citation = JSON.parse(json);
@@ -208,7 +208,7 @@ const fileToBase64 = (file: File): Promise<string> => {
 
 const extractTextFromFile = async (file: File): Promise<string> => {
   const arrayBuffer = await file.arrayBuffer();
-  
+
   if (file.name.endsWith('.docx')) {
     // @ts-ignore
     if (!window.mammoth) return "Mammoth library not loaded.";
@@ -222,13 +222,13 @@ const extractTextFromFile = async (file: File): Promise<string> => {
       // @ts-ignore
       const pdfjsLib = window['pdfjs-dist/build/pdf'];
       if (!pdfjsLib) return "PDF.js library not loaded.";
-      
+
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      
+
       const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
       const pdf = await loadingTask.promise;
       let fullText = '';
-      
+
       // Limit to first 200 pages to prevent browser hang and token blowup
       const maxPages = Math.min(pdf.numPages, 200);
       for (let i = 1; i <= maxPages; i++) {
@@ -289,22 +289,21 @@ export const ValidatorResults = ({ result, onVerify }: { result: ValidationResul
 
   return (
     <div className="space-y-8 backdrop-blur-3xl">
-      <div className={`p-10 rounded-[2.5rem] border-2 font-black italic text-4xl ${
-        result.status === 'compliant' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 'border-red-500/20 text-red-500 bg-red-500/5'
-      }`}>
+      <div className={`p-10 rounded-[2.5rem] border-2 font-black italic text-4xl ${result.status === 'compliant' ? 'border-green-500/20 text-green-500 bg-green-500/5' : 'border-red-500/20 text-red-500 bg-red-500/5'
+        }`}>
         {result.status.toUpperCase()}
       </div>
       <div className="space-y-4">
         {result.issues.map((issue, i) => (
           <div key={i} className="bg-gray-950/60 p-8 rounded-[2.5rem] border border-gray-800 flex justify-between items-start hover:border-amber-500/20 transition-all">
             <div>
-                <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2">{issue.rule}</p>
-                <p className="text-gray-400 text-sm leading-relaxed">{issue.description}</p>
+              <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2">{issue.rule}</p>
+              <p className="text-gray-400 text-sm leading-relaxed">{issue.description}</p>
             </div>
             {issue.source_reference && (
-                <div className="ml-6 shrink-0">
-                    <CitationBadge citation={issue.source_reference} onClick={onVerify} />
-                </div>
+              <div className="ml-6 shrink-0">
+                <CitationBadge citation={issue.source_reference} onClick={onVerify} />
+              </div>
             )}
           </div>
         ))}
@@ -315,47 +314,46 @@ export const ValidatorResults = ({ result, onVerify }: { result: ValidationResul
 
 export const AuditLogsTable = ({ logs, onVerify }: { logs: AuditLog[], onVerify: (c: Citation) => void }) => {
   return (
-      <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-3xl">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="bg-gray-950/80 text-gray-700 text-[11px] uppercase font-black tracking-[0.5em] border-b border-gray-800">
-              <th className="px-12 py-8">Status</th>
-              <th className="px-12 py-8">Event</th>
-              <th className="px-12 py-8">Time</th>
-              <th className="px-12 py-8">Ref</th>
+    <div className="bg-gray-900/40 border border-gray-800 rounded-[3rem] overflow-hidden shadow-2xl backdrop-blur-3xl">
+      <table className="w-full text-left">
+        <thead>
+          <tr className="bg-gray-950/80 text-gray-700 text-[11px] uppercase font-black tracking-[0.5em] border-b border-gray-800">
+            <th className="px-12 py-8">Status</th>
+            <th className="px-12 py-8">Event</th>
+            <th className="px-12 py-8">Time</th>
+            <th className="px-12 py-8">Ref</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-800/40">
+          {logs.map(log => (
+            <tr key={log.id} className="hover:bg-gray-800/20 transition-all">
+              <td className={`px-12 py-8 font-black uppercase text-[10px] ${log.status === 'compliant' ? 'text-green-500' : log.status === 'violation' ? 'text-red-500' : 'text-blue-500'}`}>{log.status}</td>
+              <td className="px-12 py-8 text-gray-300 font-bold">{log.query}</td>
+              <td className="px-12 py-8 text-gray-600 text-[10px]">{log.timestamp}</td>
+              <td className="px-12 py-8">
+                {log.citations && log.citations.length > 0 && (
+                  <div className="flex gap-2">
+                    {log.citations.map((c, i) => (
+                      <CitationBadge key={i} citation={c} onClick={onVerify} />
+                    ))}
+                  </div>
+                )}
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-800/40">
-            {logs.map(log => (
-              <tr key={log.id} className="hover:bg-gray-800/20 transition-all">
-                <td className={`px-12 py-8 font-black uppercase text-[10px] ${log.status === 'compliant' ? 'text-green-500' : log.status === 'violation' ? 'text-red-500' : 'text-blue-500'}`}>{log.status}</td>
-                <td className="px-12 py-8 text-gray-300 font-bold">{log.query}</td>
-                <td className="px-12 py-8 text-gray-600 text-[10px]">{log.timestamp}</td>
-                <td className="px-12 py-8">
-                    {log.citations && log.citations.length > 0 && (
-                        <div className="flex gap-2">
-                            {log.citations.map((c, i) => (
-                                <CitationBadge key={i} citation={c} onClick={onVerify} />
-                            ))}
-                        </div>
-                    )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
 const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-      active 
-        ? 'bg-amber-600/20 text-amber-400 border-l-4 border-amber-500' 
+    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${active
+        ? 'bg-amber-600/20 text-amber-400 border-l-4 border-amber-500'
         : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
-    }`}
+      }`}
   >
     <Icon size={20} />
     <span className="font-medium">{label}</span>
@@ -374,21 +372,20 @@ const FileUploadZone = ({ onFilesAdded, acceptedTypes }: { onFilesAdded: (files:
   };
 
   return (
-    <div 
+    <div
       onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
-      className={`border-2 border-dashed rounded-2xl p-8 transition-all cursor-pointer flex flex-col items-center justify-center space-y-3 ${
-        isDragging ? 'border-amber-500 bg-amber-500/10' : 'border-gray-800 bg-gray-900/50 hover:border-gray-600'
-      }`}
+      className={`border-2 border-dashed rounded-2xl p-8 transition-all cursor-pointer flex flex-col items-center justify-center space-y-3 ${isDragging ? 'border-amber-500 bg-amber-500/10' : 'border-gray-800 bg-gray-900/50 hover:border-gray-600'
+        }`}
     >
-      <input 
-        type="file" 
-        ref={inputRef} 
-        multiple 
-        accept={acceptedTypes} 
-        className="hidden" 
+      <input
+        type="file"
+        ref={inputRef}
+        multiple
+        accept={acceptedTypes}
+        className="hidden"
         onChange={(e) => e.target.files && onFilesAdded(Array.from(e.target.files) as File[])}
       />
       <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-gray-400">
@@ -463,26 +460,26 @@ const App = () => {
   const handleFilesAdded = async (files: File[]) => {
     setIsProcessing(true);
     const newDocs: UploadedFile[] = [];
-    
+
     for (const file of files) {
       try {
         const isPdf = file.type === 'application/pdf' || file.name.endsWith('.pdf');
         const content = await extractTextFromFile(file);
-        
+
         if (isPdf) {
           const base64 = await fileToBase64(file);
-          newDocs.push({ 
-            name: file.name, 
-            type: file.type, 
-            base64, 
-            content, 
+          newDocs.push({
+            name: file.name,
+            type: file.type,
+            base64,
+            content,
             size: file.size
           });
         } else {
-          newDocs.push({ 
-            name: file.name, 
-            type: file.type, 
-            content, 
+          newDocs.push({
+            name: file.name,
+            type: file.type,
+            content,
             size: file.size
           });
         }
@@ -490,7 +487,7 @@ const App = () => {
         console.error(`Error processing file ${file.name}:`, err);
       }
     }
-    
+
     setProject(prev => ({ ...prev, documents: [...prev.documents, ...newDocs] }));
     setIsProcessing(false);
   };
@@ -517,7 +514,7 @@ const App = () => {
       setMessages(prev => [...prev, userMsg]);
       setInputValue('');
     }
-    
+
     setIsProcessing(true);
 
     const loadingMsg: Message = { role: 'assistant', content: 'Analyzing project contracts...', isLoading: true };
@@ -583,14 +580,14 @@ const App = () => {
 
       const rawText = response.text || "I was unable to retrieve a definitive answer from the current documents.";
       const { content, citations } = parseCitations(rawText);
-      
+
       setMessages(prev => [...prev.slice(0, -1), { role: 'assistant', content, citations }]);
       setLogs(prev => [{ id: Math.random().toString(36).substr(2, 9), timestamp: new Date().toLocaleTimeString(), query, status: 'info' }, ...prev]);
     } catch (error: any) {
       console.error(error);
-      const errorMsg = error.message?.includes('token') 
+      const errorMsg = error.message?.includes('token')
         ? "The total volume of document text exceeds the model's capacity. Please remove some documents or provide more specific queries."
-        : "An error occurred while processing your request. The documents may be too complex or there's a connectivity issue.";
+        : `An error occurred: ${error.message || 'Unknown error'}. The documents may be too complex or there's a connectivity issue.`;
       setMessages(prev => [...prev.slice(0, -1), { role: 'assistant', content: errorMsg }]);
     } finally {
       setIsProcessing(false);
@@ -600,7 +597,7 @@ const App = () => {
   const handleValidateDealMemo = async () => {
     const contentToValidate = selectedValidatorFile?.content || validatorInput;
     if (!contentToValidate && !selectedValidatorFile?.base64) return;
-    
+
     setIsProcessing(true);
     setValidationResult(null);
 
@@ -636,24 +633,24 @@ const App = () => {
 
       const result = JSON.parse(response.text || '{}');
       setValidationResult(result);
-      
+
       // Collect all citations from issues to save in the log
       const auditCitations = result.issues
         ?.map((i: any) => i.source_reference)
         .filter((c: any) => c !== undefined && c !== null) || [];
 
-      setLogs(prev => [{ 
-          id: Math.random().toString(36).substr(2, 9), 
-          timestamp: new Date().toLocaleTimeString(), 
-          query: "Audit: " + (selectedValidatorFile?.name || "Text Segment"), 
-          status: result.status === 'violation' ? 'violation' : 'compliant',
-          citations: auditCitations 
+      setLogs(prev => [{
+        id: Math.random().toString(36).substr(2, 9),
+        timestamp: new Date().toLocaleTimeString(),
+        query: "Audit: " + (selectedValidatorFile?.name || "Text Segment"),
+        status: result.status === 'violation' ? 'violation' : 'compliant',
+        citations: auditCitations
       }, ...prev]);
     } catch (error: any) {
       console.error(error);
-      setValidationResult({ 
-        status: 'warning', 
-        issues: [{ rule: 'System Error', description: error.message || 'The context provided was too large for the audit engine.', severity: 'high' }], 
+      setValidationResult({
+        status: 'warning',
+        issues: [{ rule: 'System Error', description: error.message || 'The context provided was too large for the audit engine.', severity: 'high' }],
         summary: 'The audit failed to complete due to document complexity.'
       });
     } finally {
@@ -663,8 +660,8 @@ const App = () => {
 
   const toggleUnion = (id: string) => {
     setProject(prev => {
-      const unions = prev.unions.includes(id) 
-        ? prev.unions.filter(u => u !== id) 
+      const unions = prev.unions.includes(id)
+        ? prev.unions.filter(u => u !== id)
         : [...prev.unions, id];
       return { ...prev, unions };
     });
@@ -672,28 +669,28 @@ const App = () => {
 
   // Robust citation resolution
   const resolveCitationRobust = (citation: Citation, documents: UploadedFile[]) => {
-     // Helper to strip extension
-     const stripExt = (s: string) => s.replace(/\.[^/.]+$/, "");
-     
-     // 1. Exact match
-     let match = documents.find(d => d.name === citation.docId);
-     
-     // 2. Case-insensitive
-     if (!match) {
-        match = documents.find(d => d.name.toLowerCase() === citation.docId.toLowerCase());
-     }
-     
-     // 3. Ignore extensions (e.g. "contract" matches "contract.pdf")
-     if (!match) {
-         match = documents.find(d => stripExt(d.name).toLowerCase() === stripExt(citation.docId).toLowerCase());
-     }
+    // Helper to strip extension
+    const stripExt = (s: string) => s.replace(/\.[^/.]+$/, "");
 
-     // 4. Fuzzy contains (if AI omitted extension or part of name)
-     if (!match) {
-        match = documents.find(d => d.name.includes(citation.docId) || citation.docId.includes(d.name));
-     }
-     
-     return match ? { doc: match, term: citation.textSnippet } : null;
+    // 1. Exact match
+    let match = documents.find(d => d.name === citation.docId);
+
+    // 2. Case-insensitive
+    if (!match) {
+      match = documents.find(d => d.name.toLowerCase() === citation.docId.toLowerCase());
+    }
+
+    // 3. Ignore extensions (e.g. "contract" matches "contract.pdf")
+    if (!match) {
+      match = documents.find(d => stripExt(d.name).toLowerCase() === stripExt(citation.docId).toLowerCase());
+    }
+
+    // 4. Fuzzy contains (if AI omitted extension or part of name)
+    if (!match) {
+      match = documents.find(d => d.name.includes(citation.docId) || citation.docId.includes(d.name));
+    }
+
+    return match ? { doc: match, term: citation.textSnippet } : null;
   };
 
   const handleCitationClick = (citation: Citation) => {
@@ -702,7 +699,7 @@ const App = () => {
       setViewingDoc(resolution.doc);
       setHighlightTerm(resolution.term);
     } else {
-        console.warn("Could not resolve docId:", citation.docId);
+      console.warn("Could not resolve docId:", citation.docId);
     }
   };
 
@@ -721,36 +718,36 @@ const App = () => {
 
     if (!doc.content) return <div className="p-12 text-center text-gray-700"><p>Binary preview unavailable.</p></div>;
     const text = doc.content;
-    
+
     // Improved matching strategy
     const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const normalize = (s: string) => s.replace(/\s+/g, ' ').trim();
-    
+
     const cleanTerm = normalize(term);
     const words = cleanTerm.split(' ');
-    
+
     let highlightPattern = '';
-    
+
     if (words.length > 20) {
-       // For long snippets, match start (first 8 words) ... end (last 8 words)
-       const start = words.slice(0, 8).map(escapeRegExp).join('[\\s\\S]{0,20}?');
-       const end = words.slice(-8).map(escapeRegExp).join('[\\s\\S]{0,20}?');
-       highlightPattern = `${start}[\\s\\S]+?${end}`;
+      // For long snippets, match start (first 8 words) ... end (last 8 words)
+      const start = words.slice(0, 8).map(escapeRegExp).join('[\\s\\S]{0,20}?');
+      const end = words.slice(-8).map(escapeRegExp).join('[\\s\\S]{0,20}?');
+      highlightPattern = `${start}[\\s\\S]+?${end}`;
     } else {
-       // For shorter snippets, match all words with flexible spacing
-       highlightPattern = words.map(escapeRegExp).join('[\\s\\S]{0,50}?');
+      // For shorter snippets, match all words with flexible spacing
+      highlightPattern = words.map(escapeRegExp).join('[\\s\\S]{0,50}?');
     }
-    
+
     let segments: string[] = [text];
     let matchedText = "";
-    
+
     if (cleanTerm.length > 0) {
       try {
         const regex = new RegExp(`(${highlightPattern})`, 'gi');
         const match = text.match(regex);
         if (match) {
-           matchedText = match[0];
-           segments = text.split(regex);
+          matchedText = match[0];
+          segments = text.split(regex);
         }
         // Removed single-word fallback to prevent incorrect highlighting
       } catch (e) { segments = [text]; }
@@ -759,13 +756,13 @@ const App = () => {
     return (
       <div className="bg-[#0c0c0c] p-10 rounded-[2.5rem] border border-gray-800/50 font-serif text-sm leading-relaxed text-gray-400 overflow-y-auto max-h-full shadow-2xl">
         <div className="flex justify-between items-center mb-10 border-b border-gray-800 pb-6">
-           <div className="flex items-center space-x-3">
-              <Scale size={16} className="text-amber-500" />
-              <div>
-                 <h4 className="text-xs font-black text-white uppercase tracking-widest">{doc.name}</h4>
-                 <p className="text-[9px] text-gray-600 font-mono uppercase">Master Audit Copy</p>
-              </div>
-           </div>
+          <div className="flex items-center space-x-3">
+            <Scale size={16} className="text-amber-500" />
+            <div>
+              <h4 className="text-xs font-black text-white uppercase tracking-widest">{doc.name}</h4>
+              <p className="text-[9px] text-gray-600 font-mono uppercase">Master Audit Copy</p>
+            </div>
+          </div>
         </div>
         <div className="whitespace-pre-wrap">
           {segments.map((part, i) => (
@@ -776,8 +773,8 @@ const App = () => {
             // A better way is to alternate: even indices are text, odd are matches (if we used capturing group).
             // MDN: If separator is a regex with capturing parentheses, then each time separator matches, the results (including any undefined results) of the capturing parentheses are spliced into the output array.
             // So: [text, match, text, match, text]
-            (i % 2 === 1) ? 
-              <span key={i} ref={highlightRef} className="bg-amber-500/30 text-amber-100 border-b-2 border-amber-500 font-bold px-1.5 py-0.5 rounded animate-pulse">{part}</span> : 
+            (i % 2 === 1) ?
+              <span key={i} ref={highlightRef} className="bg-amber-500/30 text-amber-100 border-b-2 border-amber-500 font-bold px-1.5 py-0.5 rounded animate-pulse">{part}</span> :
               part
           ))}
         </div>
@@ -799,7 +796,7 @@ const App = () => {
           {/* Production Title */}
           <div>
             <label className="block text-sm font-bold text-gray-400 mb-2">Production Title *</label>
-            <input 
+            <input
               type="text" placeholder="Enter production title"
               className="w-full bg-gray-950/80 border border-gray-800 rounded-xl px-5 py-4 text-white font-medium focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
               value={project.name}
@@ -811,7 +808,7 @@ const App = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <label className="block text-sm font-bold text-gray-400 mb-2">Production Type *</label>
-              <select 
+              <select
                 className="w-full bg-gray-950/80 border border-gray-800 rounded-xl px-5 py-4 text-white font-medium focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
                 value={project.productionType}
                 onChange={(e) => setProject(prev => ({ ...prev, productionType: e.target.value }))}
@@ -824,8 +821,8 @@ const App = () => {
               <label className="block text-sm font-bold text-gray-400 mb-2">Budget</label>
               <div className="relative">
                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600 font-bold">$</span>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="e.g. 5,000,000"
                   className="w-full bg-gray-950/80 border border-gray-800 rounded-xl pl-10 pr-5 py-4 text-white font-medium focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
                   value={project.budgetAmount}
@@ -839,7 +836,7 @@ const App = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <label className="block text-sm font-bold text-gray-400 mb-2">Status</label>
-              <select 
+              <select
                 className="w-full bg-gray-950/80 border border-gray-800 rounded-xl px-5 py-4 text-white font-medium focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
                 value={project.status}
                 onChange={(e) => setProject(prev => ({ ...prev, status: e.target.value }))}
@@ -851,8 +848,8 @@ const App = () => {
               <label className="block text-sm font-bold text-gray-400 mb-2">Production Company</label>
               <div className="relative">
                 <Building2 className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Company name"
                   className="w-full bg-gray-950/80 border border-gray-800 rounded-xl pl-12 pr-5 py-4 text-white font-medium focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
                   value={project.productionCompany}
@@ -868,13 +865,12 @@ const App = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {UNION_OPTIONS.map(union => (
                 <label key={union.id} className="flex items-center space-x-3 cursor-pointer group">
-                  <div 
+                  <div
                     onClick={() => toggleUnion(union.id)}
-                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
-                      project.unions.includes(union.id) 
-                        ? 'bg-amber-500 border-amber-500 text-gray-950' 
+                    className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${project.unions.includes(union.id)
+                        ? 'bg-amber-500 border-amber-500 text-gray-950'
                         : 'bg-gray-950 border-gray-800 group-hover:border-gray-600'
-                    }`}
+                      }`}
                   >
                     {project.unions.includes(union.id) && <CheckCircle2 size={16} />}
                   </div>
@@ -892,8 +888,8 @@ const App = () => {
               <label className="block text-sm font-bold text-gray-400 mb-2">Start Date</label>
               <div className="relative">
                 <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   className="w-full bg-gray-950/80 border border-gray-800 rounded-xl pl-12 pr-5 py-4 text-white font-medium focus:ring-2 focus:ring-amber-500/20 outline-none transition-all [color-scheme:dark]"
                   value={project.startDate}
                   onChange={(e) => setProject(prev => ({ ...prev, startDate: e.target.value }))}
@@ -904,8 +900,8 @@ const App = () => {
               <label className="block text-sm font-bold text-gray-400 mb-2">End Date</label>
               <div className="relative">
                 <Clock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
-                <input 
-                  type="date" 
+                <input
+                  type="date"
                   className="w-full bg-gray-950/80 border border-gray-800 rounded-xl pl-12 pr-5 py-4 text-white font-medium focus:ring-2 focus:ring-amber-500/20 outline-none transition-all [color-scheme:dark]"
                   value={project.endDate}
                   onChange={(e) => setProject(prev => ({ ...prev, endDate: e.target.value }))}
@@ -920,8 +916,8 @@ const App = () => {
               <label className="block text-sm font-bold text-gray-400 mb-2">Primary Location (State)</label>
               <div className="relative">
                 <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="e.g., California"
                   className="w-full bg-gray-950/80 border border-gray-800 rounded-xl pl-12 pr-5 py-4 text-white font-medium focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
                   value={project.location}
@@ -933,8 +929,8 @@ const App = () => {
               <label className="block text-sm font-bold text-gray-400 mb-2">EP Paymaster ID</label>
               <div className="relative">
                 <CreditCard className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Project ID"
                   className="w-full bg-gray-950/80 border border-gray-800 rounded-xl pl-12 pr-5 py-4 text-white font-medium focus:ring-2 focus:ring-amber-500/20 outline-none transition-all"
                   value={project.paymasterId}
@@ -949,7 +945,7 @@ const App = () => {
               <Database size={22} />
               <span>Knowledge Ingest</span>
             </h3>
-            
+
             <div className="grid grid-cols-1 gap-6">
               <FileUploadZone onFilesAdded={handleFilesAdded} acceptedTypes=".pdf,.docx,.txt,.md" />
             </div>
@@ -970,7 +966,7 @@ const App = () => {
 
         <div className="px-10 py-8 bg-gray-950/50 border-t border-gray-800 flex justify-end space-x-4">
           <button onClick={() => setActiveTab('dashboard')} className="px-8 py-3 bg-white text-gray-950 font-black rounded-xl uppercase tracking-widest text-xs hover:bg-gray-200 transition-all">Cancel</button>
-          <button 
+          <button
             disabled={!project.name}
             onClick={() => setActiveTab('dashboard')}
             className="px-8 py-3 bg-amber-500 text-gray-950 font-black rounded-xl uppercase tracking-widest text-xs shadow-xl shadow-amber-500/10 hover:bg-amber-400 transition-all disabled:opacity-30"
@@ -989,8 +985,8 @@ const App = () => {
           <h1 className="text-4xl font-black text-white mb-2 tracking-tighter">Production Pulse</h1>
           <div className="flex items-center space-x-4">
             <span className="text-green-500 flex items-center space-x-2 bg-green-500/5 border border-green-500/10 px-3 py-1 rounded-full text-[10px] font-black uppercase">
-               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-               <span>LIVE AUDIT ACTIVE</span>
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+              <span>LIVE AUDIT ACTIVE</span>
             </span>
             {project.startDate && project.endDate && (
               <span className="text-gray-500 text-xs font-bold uppercase tracking-widest">
@@ -998,21 +994,21 @@ const App = () => {
               </span>
             )}
             {project.location && (
-               <span className="text-gray-600 text-[10px] font-black uppercase flex items-center space-x-1">
-                 <MapPin size={12} />
-                 <span>{project.location}</span>
-               </span>
+              <span className="text-gray-600 text-[10px] font-black uppercase flex items-center space-x-1">
+                <MapPin size={12} />
+                <span>{project.location}</span>
+              </span>
             )}
           </div>
         </div>
         <div className="flex space-x-4">
-            <div className="bg-gray-900/60 border border-gray-800 px-8 py-5 rounded-[2rem] backdrop-blur-xl shadow-xl flex flex-col justify-center">
-              <p className="text-[10px] text-gray-700 uppercase font-black tracking-[0.3em] mb-1">Production Budget</p>
-              <div className="flex items-center space-x-2">
-                <DollarSign size={18} className="text-amber-500" />
-                <p className="text-3xl font-black text-white">{project.budgetAmount || '0.00'}</p>
-              </div>
+          <div className="bg-gray-900/60 border border-gray-800 px-8 py-5 rounded-[2rem] backdrop-blur-xl shadow-xl flex flex-col justify-center">
+            <p className="text-[10px] text-gray-700 uppercase font-black tracking-[0.3em] mb-1">Production Budget</p>
+            <div className="flex items-center space-x-2">
+              <DollarSign size={18} className="text-amber-500" />
+              <p className="text-3xl font-black text-white">{project.budgetAmount || '0.00'}</p>
             </div>
+          </div>
         </div>
       </div>
 
@@ -1023,7 +1019,7 @@ const App = () => {
         </div>
         <div className="w-full md:w-[28rem] relative z-10">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-600" size={20} />
-          <input 
+          <input
             type="text"
             onKeyDown={(e) => e.key === 'Enter' && quickAction((e.target as HTMLInputElement).value)}
             placeholder="e.g. SAG-AFTRA overtime triggers..."
@@ -1039,10 +1035,9 @@ const App = () => {
           { icon: History, label: 'Audit Vault', desc: 'Permanent log of all compliance decisions and queries.', tab: 'logs', color: 'purple' },
         ].map(item => (
           <div key={item.tab} onClick={() => setActiveTab(item.tab as any)} className="bg-gray-900/40 p-10 rounded-[3rem] border border-gray-800 hover:border-amber-500/40 cursor-pointer shadow-2xl transition-all">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-10 ${
-              item.color === 'amber' ? 'bg-amber-600/10 text-amber-500 border border-amber-500/20' : 
-              item.color === 'blue' ? 'bg-blue-600/10 text-blue-500 border border-blue-500/20' : 'bg-purple-600/10 text-purple-500 border border-purple-500/20'
-            }`}>
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-10 ${item.color === 'amber' ? 'bg-amber-600/10 text-amber-500 border border-amber-500/20' :
+                item.color === 'blue' ? 'bg-blue-600/10 text-blue-500 border border-blue-500/20' : 'bg-purple-600/10 text-purple-500 border border-purple-500/20'
+              }`}>
               <item.icon size={32} />
             </div>
             <h3 className="text-2xl font-black text-white mb-4 tracking-tighter">{item.label}</h3>
@@ -1064,9 +1059,8 @@ const App = () => {
         <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] rounded-[2.5rem] p-8 shadow-2xl ${
-                msg.role === 'user' ? 'bg-amber-600 text-white font-black text-sm' : 'bg-gray-900/80 border border-gray-800 text-gray-200'
-              }`}>
+              <div className={`max-w-[85%] rounded-[2.5rem] p-8 shadow-2xl ${msg.role === 'user' ? 'bg-amber-600 text-white font-black text-sm' : 'bg-gray-900/80 border border-gray-800 text-gray-200'
+                }`}>
                 {msg.isLoading ? <Loader2 className="animate-spin text-amber-500" size={24} /> : <ChatBubble message={msg} onCitationClick={handleCitationClick} />}
               </div>
             </div>
@@ -1076,14 +1070,14 @@ const App = () => {
 
         <div className="p-10 bg-gray-950/80 border-t border-gray-800">
           <div className="max-w-4xl mx-auto flex space-x-5">
-            <input 
+            <input
               type="text" value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Ask a compliance question..."
               className="flex-1 bg-gray-900 border border-gray-800 rounded-2xl px-8 py-6 text-white font-bold"
             />
-            <button 
+            <button
               disabled={isProcessing || !inputValue.trim()}
               onClick={() => handleSendMessage()}
               className="bg-amber-600 text-white w-20 h-20 rounded-[1.8rem] flex items-center justify-center transition-all shadow-2xl"
@@ -1101,11 +1095,11 @@ const App = () => {
       <h1 className="text-4xl font-black text-white mb-8 tracking-tighter italic">Audit Engine</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 flex-1 min-h-0">
         <div className="flex flex-col space-y-6">
-          <FileUploadZone 
+          <FileUploadZone
             onFilesAdded={async (files) => {
               const file = files[0];
               if (!file) return;
-              
+
               // Set generic file info immediately so UI updates
               setSelectedValidatorFile({ name: file.name, type: file.type, size: file.size, content: '' });
 
@@ -1115,27 +1109,27 @@ const App = () => {
               if (isPdf) {
                 base64 = await fileToBase64(file);
               }
-              
+
               // Update with content
               setSelectedValidatorFile(prev => prev ? { ...prev, content, base64 } : null);
-            }} 
+            }}
             acceptedTypes=".pdf,.docx,.txt"
           />
           {selectedValidatorFile && (
-              <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl flex justify-between items-center">
-                  <span className="text-blue-200 text-sm font-bold flex items-center gap-2">
-                      <FileText size={16}/> {selectedValidatorFile.name}
-                  </span>
-                  <button onClick={() => setSelectedValidatorFile(null)} className="text-blue-400 hover:text-white"><X size={16}/></button>
-              </div>
+            <div className="bg-blue-900/20 border border-blue-500/30 p-4 rounded-xl flex justify-between items-center">
+              <span className="text-blue-200 text-sm font-bold flex items-center gap-2">
+                <FileText size={16} /> {selectedValidatorFile.name}
+              </span>
+              <button onClick={() => setSelectedValidatorFile(null)} className="text-blue-400 hover:text-white"><X size={16} /></button>
+            </div>
           )}
-          <textarea 
+          <textarea
             value={validatorInput}
             onChange={(e) => { setValidatorInput(e.target.value); setSelectedValidatorFile(null); }}
             placeholder="Paste contract language..."
             className="flex-1 bg-gray-900/40 border border-gray-800 rounded-[2.5rem] p-10 text-gray-300 font-serif text-sm"
           ></textarea>
-          <button 
+          <button
             disabled={isProcessing || (!validatorInput && !selectedValidatorFile)}
             onClick={handleValidateDealMemo}
             className="bg-blue-600 text-white font-black py-6 rounded-[2rem] uppercase tracking-[0.3em] text-xs shadow-2xl"
@@ -1155,7 +1149,7 @@ const App = () => {
       <div className="flex justify-between items-center mb-12">
         <h1 className="text-4xl font-black text-white tracking-tighter italic">Audit Vault</h1>
       </div>
-      
+
       <AuditLogsTable logs={logs} onVerify={handleCitationClick} />
     </div>
   );
@@ -1163,15 +1157,15 @@ const App = () => {
   return (
     <div className="flex h-screen bg-[#050505] text-gray-100 font-sans selection:bg-amber-500/40 relative">
       <div className="fixed inset-0 pointer-events-none opacity-20 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] z-0"></div>
-      
+
       <div className="w-80 bg-gray-950 border-r border-gray-800/50 flex flex-col shrink-0 z-30 shadow-2xl">
         <div className="p-12 flex items-center space-x-5 mb-8">
           <div className="bg-gradient-to-br from-amber-500 to-amber-700 p-3 rounded-2xl shadow-2xl border border-amber-500/20">
             <BookOpen className="text-white" size={28} strokeWidth={3} />
           </div>
           <div className="flex flex-col">
-             <span className="text-3xl font-black tracking-tighter text-white leading-none italic">ByTheBook</span>
-             <span className="text-[9px] font-black text-amber-500/60 uppercase tracking-[0.6em] leading-none mt-2">Contracts Compliance OS</span>
+            <span className="text-3xl font-black tracking-tighter text-white leading-none italic">ByTheBook</span>
+            <span className="text-[9px] font-black text-amber-500/60 uppercase tracking-[0.6em] leading-none mt-2">Contracts Compliance OS</span>
           </div>
         </div>
 
@@ -1182,7 +1176,7 @@ const App = () => {
           <SidebarItem icon={ShieldCheck} label="Audit Engine" active={activeTab === 'validator'} onClick={() => setActiveTab('validator')} />
           <SidebarItem icon={History} label="Vault Logs" active={activeTab === 'logs'} onClick={() => setActiveTab('logs')} />
           <div className="pt-20">
-             <SidebarItem icon={Settings} label="Project Setup" active={activeTab === 'wizard'} onClick={() => setActiveTab('wizard')} />
+            <SidebarItem icon={Settings} label="Project Setup" active={activeTab === 'wizard'} onClick={() => setActiveTab('wizard')} />
           </div>
         </nav>
       </div>
@@ -1199,14 +1193,14 @@ const App = () => {
           {viewingDoc && (
             <div className="flex flex-col h-full">
               <div className="px-10 py-8 border-b border-gray-800 bg-gray-950 flex justify-between items-center shrink-0">
-                 <div className="flex items-center space-x-4">
-                    <BookOpen size={24} className="text-amber-500" />
-                    <h3 className="text-lg font-black text-white truncate max-w-sm">{viewingDoc.name}</h3>
-                 </div>
-                 <button onClick={() => setViewingDoc(null)} className="text-gray-600 hover:text-white"><X size={24} /></button>
+                <div className="flex items-center space-x-4">
+                  <BookOpen size={24} className="text-amber-500" />
+                  <h3 className="text-lg font-black text-white truncate max-w-sm">{viewingDoc.name}</h3>
+                </div>
+                <button onClick={() => setViewingDoc(null)} className="text-gray-600 hover:text-white"><X size={24} /></button>
               </div>
               <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
-                 <HighlightedDocument doc={viewingDoc} term={highlightTerm} />
+                <HighlightedDocument doc={viewingDoc} term={highlightTerm} />
               </div>
             </div>
           )}
