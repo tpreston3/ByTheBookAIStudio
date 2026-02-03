@@ -25,3 +25,4 @@ dist-ssr
 
 *.zip
 tests/Error_Capture.JPG
+deploy_to_cloud_run.ps1
